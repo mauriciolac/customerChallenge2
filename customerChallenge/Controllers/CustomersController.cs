@@ -90,17 +90,30 @@ namespace customerChallenge.Controllers
 
         // POST: api/Customers
         [HttpPost]
-        public async Task<IActionResult> PostCustomer([FromBody] Customer customer)
+        public IActionResult PostCustomer([FromBody] Customer customer)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
+            
+            Customer oCustomer = _context.Customers.SingleOrDefault(c => c.email == customer.email);
+            if (oCustomer != null)
+            {
+                oCustomer.email = customer.email;
+                oCustomer.name = customer.name;
+            } else {
+                oCustomer = new Customer();
+                oCustomer.email = customer.email;
+                oCustomer.name = customer.name;
+                _context.Customers.Add(customer);                
+            }
 
-            _context.Customers.Add(customer);
-            await _context.SaveChangesAsync();
+            _context.SaveChanges();
 
-            return CreatedAtAction("GetCustomer", new { id = customer.Id }, customer);
+            oCustomer = _context.Customers.SingleOrDefault(c => c.email == customer.email);
+
+            return CreatedAtAction("GetCustomer", new { id = oCustomer.Id }, oCustomer);
         }
 
         // DELETE: api/Customers/5
@@ -126,7 +139,20 @@ namespace customerChallenge.Controllers
 
         private bool CustomerExists(int id)
         {
-            return _context.Customers.Any(e => e.Id == id);
+            return _context.Customers.Any(c => c.Id == id);
         }
+
+        private bool CustomerExists(string email)
+        {
+            return _context.Customers.Any(c => c.email == email);
+        }
+
+        private Customer getCustomerByEmail(string email)
+        {
+            var customer =   _context.Customers.SingleOrDefault(c => c.email == email);
+            return customer;
+        }        
+
     }
+
 }
