@@ -18,13 +18,7 @@ namespace customerChallenge.Controllers
         public CustomersController(CustomerContext context)
         {
             _context = context;
-
-            if (_context.Customers.Count() == 0)
-            {
-                _context.Customers.Add(new Customer { name = "nomeTeste", email = "email@teste.com" });
-                _context.SaveChanges();
-            }
-
+            
         }
 
         // GET: api/Customers
@@ -102,7 +96,8 @@ namespace customerChallenge.Controllers
             {
                 oCustomer.email = customer.email;
                 oCustomer.name = customer.name;
-            } else {
+            } else
+            {
                 oCustomer = new Customer();
                 oCustomer.email = customer.email;
                 oCustomer.name = customer.name;
