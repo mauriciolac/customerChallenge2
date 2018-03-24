@@ -45,42 +45,7 @@ namespace customerChallenge.Controllers
             }
 
             return Ok(customer);
-        }
-
-        // PUT: api/Customers/5
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutCustomer([FromRoute] int id, [FromBody] Customer customer)
-        {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
-
-            if (id != customer.Id)
-            {
-                return BadRequest();
-            }
-
-            _context.Entry(customer).State = EntityState.Modified;
-
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!CustomerExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
-
-            return NoContent();
-        }
+        }        
 
         // POST: api/Customers
         [HttpPost]
@@ -109,44 +74,8 @@ namespace customerChallenge.Controllers
             oCustomer = _context.Customers.SingleOrDefault(c => c.email == customer.email);
 
             return CreatedAtAction("GetCustomer", new { id = oCustomer.Id }, oCustomer);
-        }
-
-        // DELETE: api/Customers/5
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteCustomer([FromRoute] int id)
-        {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
-
-            var customer = await _context.Customers.SingleOrDefaultAsync(m => m.Id == id);
-            if (customer == null)
-            {
-                return NotFound();
-            }
-
-            _context.Customers.Remove(customer);
-            await _context.SaveChangesAsync();
-
-            return Ok(customer);
-        }
-
-        private bool CustomerExists(int id)
-        {
-            return _context.Customers.Any(c => c.Id == id);
-        }
-
-        private bool CustomerExists(string email)
-        {
-            return _context.Customers.Any(c => c.email == email);
-        }
-
-        private Customer getCustomerByEmail(string email)
-        {
-            var customer =   _context.Customers.SingleOrDefault(c => c.email == email);
-            return customer;
-        }        
+        }      
+        
 
     }
 
