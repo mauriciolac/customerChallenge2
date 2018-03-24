@@ -1,176 +1,171 @@
-﻿using Newtonsoft.Json;
-using System;
-using System.Collections.Generic;
-using System.Net;
-using System.Net.Http;
-using System.Net.Http.Headers;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Net.Http;
 using Xunit;
+using Microsoft.AspNetCore.TestHost;
+using Microsoft.AspNetCore.Hosting;
+using customerChallenge;
+using System.Net;
+using Newtonsoft.Json;
+using System.Text;
 
 namespace CustomerChallengeTests
 {
     public class TestCustomerRequests
     {
 
-        //private string baseUrl = "https://fast-badlands-14317.herokuapp.com/api/customers";
-        private string baseUrl = "http://localhost:24649/";
-        private HttpClient client;
+        private readonly TestServer server;
+        private readonly HttpClient client;
 
         public TestCustomerRequests()
         {
-            client = new HttpClient();
-            client.BaseAddress = new Uri(baseUrl);
-            client.DefaultRequestHeaders.Accept.Clear();
-            client.DefaultRequestHeaders.Accept.Add(
-                new MediaTypeWithQualityHeaderValue("application/json"));
+            server = new TestServer(new WebHostBuilder()
+            .UseStartup<Startup>());
+            client = server.CreateClient();
         }
 
         public class Customer
         {
             public int Id { get; set; }
-            public string name { get; set; }
-            public string email { get; set; }
+            public string Name { get; set; }
+            public string Email { get; set; }
         }
 
         [Fact]
-        public async void testCreate1()
+        public async void TestCreate1()
+        {
+            
+            var customer = new Customer
+            {
+                Name = "John Frusciante",
+                Email = "fruscieante@email.com"
+            };
+
+            StringContent jsonStringContent = new StringContent(JsonConvert.SerializeObject(customer), Encoding.UTF8, "application/json");
+
+            var postResponse1 = await client.PostAsync("/api/customers", jsonStringContent);
+            Assert.Equal(HttpStatusCode.Created, postResponse1.StatusCode);
+            var postResponse2 = await client.PostAsJsonAsync("/api/customers", customer);
+            Assert.Equal(HttpStatusCode.Created, postResponse2.StatusCode);
+
+        }
+
+        [Fact]
+        public async void TestCreate2()
         {
 
             var customer = new Customer
             {
-                name = "John Frusciante",
-                email = "fruscieante@email.com"
+                Name = "Ronaldo Nazário",
+                Email = "r9@email.com"
             };
 
             var postResponse = await client.PostAsJsonAsync("/api/customers", customer);
-            var created = await postResponse.Content.ReadAsAsync<Customer>();
-            Assert.True(created.Id != 0, "id:" + created.Id.ToString());
-            //Assert.True(postResponse.IsSuccessStatusCode);
-        }
-
-        [Fact]
-        public async void testCreate2()
-        {
-
-            var customer = new Customer
-            {
-                name = "Ronaldo Nazário",
-                email = "r9@email.com"
-            };
-
-            var postResponse = await client.PostAsJsonAsync("/api/customers", customer);
-            var created = await postResponse.Content.ReadAsAsync<Customer>();
-            Assert.True(created.Id != 0, "id:" + created.Id.ToString());
-            //Assert.True(postResponse.IsSuccessStatusCode);
-
+            Assert.Equal(HttpStatusCode.Created, postResponse.StatusCode);
 
         }
 
         [Fact]
-        public async void testCreateDifferentCustomers()
+        public async void TestCreateDifferentCustomers()
         {
 
             var customer1 = new Customer
             {
-                name = "John Mayer",
-                email = "mayer@email.com"
+                Name = "John Mayer",
+                Email = "mayer@email.com"
             };
 
             var customer2 = new Customer
             {
-                name = "Robert Plant",
-                email = "plant@email.com"
+                Name = "Robert Plant",
+                Email = "plant@email.com"
             };
 
             var postResponse1 = await client.PostAsJsonAsync("/api/customers", customer1);
+            Assert.Equal(HttpStatusCode.Created, postResponse1.StatusCode);
             var created1 = await postResponse1.Content.ReadAsAsync<Customer>();
 
             var postResponse2 = await client.PostAsJsonAsync("/api/customers", customer2);
+            Assert.Equal(HttpStatusCode.Created, postResponse2.StatusCode);
             var created2 = await postResponse2.Content.ReadAsAsync<Customer>();
 
-
-            Assert.True(created1.Id != created2.Id, "id1:" + created1.Id.ToString() + " id2:" + created2.Id);
+            Assert.NotEqual(created1.Id, created2.Id);
 
         }
 
         [Fact]
-        public async void testUpdateCustomersSameEmail()
+        public async void TestUpdateCustomersSameEmail()
         {
 
             var customer1 = new Customer
             {
-                name = "Paul Gonzales",
-                email = "gonzales@email.com"
+                Name = "Paul Gonzales",
+                Email = "gonzales@email.com"
             };
 
             var customer2 = new Customer
             {
-                name = "Raul Gonzales",
-                email = "gonzales@email.com"
+                Name = "Raul Gonzales",
+                Email = "gonzales@email.com"
             };
 
             var postResponse1 = await client.PostAsJsonAsync("/api/customers", customer1);
+            Assert.Equal(HttpStatusCode.Created, postResponse1.StatusCode);
             var created1 = await postResponse1.Content.ReadAsAsync<Customer>();
 
             var postResponse2 = await client.PostAsJsonAsync("/api/customers", customer2);
+            Assert.Equal(HttpStatusCode.Created, postResponse1.StatusCode);
             var created2 = await postResponse2.Content.ReadAsAsync<Customer>();
-
-            if (created1.Id == created2.Id && created1.name != created2.name && created2.name == customer2.name)
-            {
-                Assert.True(true);
-            }
-            else
-            {
-                Assert.True(false, "id1:" + created1.Id + "id2:" + created2.Id);
-            }
+            Assert.Equal(created1.Id, created2.Id);
+            Assert.Equal(created2.Name, customer2.Name);
+            Assert.NotEqual(created1.Name, created2.Name);
+                       
         }
-
+        
         [Fact]
-        public async void testEmptyName()
+        public async void TestEmptyName()
         {
 
             var customer1 = new Customer
             {
-                name = "",
-                email = "gonzales@email.com"
+                Name = "",
+                Email = "gonzales@email.com"
             };
 
             var customer2 = new Customer
             {
-                name = "Raul Gonzales",
-                email = ""
+                Name = "Raul Gonzales",
+                Email = ""
             };
 
             var postResponse1 = await client.PostAsJsonAsync("/api/customers", customer1);
-            Assert.False(postResponse1.IsSuccessStatusCode);
+            Assert.Equal(HttpStatusCode.BadRequest, postResponse1.StatusCode);
 
         }
 
         [Fact]
-        public async void testEmptyEmail()
+        public async void TestEmptyEmail()
         {            
             var customer1 = new Customer
             {
-                name = "Raul Gonzales",
-                email = ""
+                Name = "Raul Gonzales",
+                Email = ""
             };
 
             var postResponse1 = await client.PostAsJsonAsync("/api/customers", customer1);
-            Assert.False(postResponse1.IsSuccessStatusCode);
+            Assert.Equal(HttpStatusCode.BadRequest, postResponse1.StatusCode);
         }
 
         [Fact]
-        public async void testEmailFormat()
+        public async void TestEmailFormat()
         {
             var customer1 = new Customer
             {
-                name = "Michael Gonzales",
-                email = "wrongemailformat"
+                Name = "Michael Gonzales",
+                Email = "wrongemailformat"
             };
 
             var postResponse1 = await client.PostAsJsonAsync("/api/customers", customer1);
-            Assert.False(postResponse1.IsSuccessStatusCode);
+            Assert.Equal(HttpStatusCode.BadRequest, postResponse1.StatusCode);
+
         }
 
     }

@@ -1,15 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 
 namespace customerChallenge.models
 {
     public class CustomerContext:DbContext
     {
-        public CustomerContext(DbContextOptions<CustomerContext> options)
-            : base(options)
+        public CustomerContext(DbContextOptions<CustomerContext> options) : base(options)
         {
         }
 
