@@ -37,14 +37,11 @@ namespace CustomerChallengeTests
             {
                 Name = "John Frusciante",
                 Email = "fruscieante@email.com"
-            };
+            };            
 
-            StringContent jsonStringContent = new StringContent(JsonConvert.SerializeObject(customer), Encoding.UTF8, "application/json");
-
-            var postResponse1 = await client.PostAsync("/api/customers", jsonStringContent);
-            Assert.Equal(HttpStatusCode.Created, postResponse1.StatusCode);
-            var postResponse2 = await client.PostAsJsonAsync("/api/customers", customer);
-            Assert.Equal(HttpStatusCode.Created, postResponse2.StatusCode);
+           StringContent jsonStringContent = new StringContent(JsonConvert.SerializeObject(customer), Encoding.UTF8, "application/json");
+           var postResponse = await client.PostAsync("/api/customers", jsonStringContent);
+           Assert.Equal(HttpStatusCode.Created, postResponse.StatusCode);
 
         }
 
@@ -58,7 +55,8 @@ namespace CustomerChallengeTests
                 Email = "r9@email.com"
             };
 
-            var postResponse = await client.PostAsJsonAsync("/api/customers", customer);
+            StringContent jsonStringContent = new StringContent(JsonConvert.SerializeObject(customer), Encoding.UTF8, "application/json");
+            var postResponse = await client.PostAsync("/api/customers", jsonStringContent);
             Assert.Equal(HttpStatusCode.Created, postResponse.StatusCode);
 
         }
@@ -72,18 +70,20 @@ namespace CustomerChallengeTests
                 Name = "John Mayer",
                 Email = "mayer@email.com"
             };
+            StringContent jsonStringContent1 = new StringContent(JsonConvert.SerializeObject(customer1), Encoding.UTF8, "application/json");
 
             var customer2 = new Customer
             {
                 Name = "Robert Plant",
                 Email = "plant@email.com"
             };
-
-            var postResponse1 = await client.PostAsJsonAsync("/api/customers", customer1);
+            StringContent jsonStringContent2 = new StringContent(JsonConvert.SerializeObject(customer2), Encoding.UTF8, "application/json");
+            
+            var postResponse1 = await client.PostAsync("/api/customers", jsonStringContent1);
             Assert.Equal(HttpStatusCode.Created, postResponse1.StatusCode);
             var created1 = await postResponse1.Content.ReadAsAsync<Customer>();
 
-            var postResponse2 = await client.PostAsJsonAsync("/api/customers", customer2);
+            var postResponse2 = await client.PostAsync("/api/customers", jsonStringContent2);
             Assert.Equal(HttpStatusCode.Created, postResponse2.StatusCode);
             var created2 = await postResponse2.Content.ReadAsAsync<Customer>();
 
@@ -100,18 +100,20 @@ namespace CustomerChallengeTests
                 Name = "Paul Gonzales",
                 Email = "gonzales@email.com"
             };
+            StringContent jsonStringContent1 = new StringContent(JsonConvert.SerializeObject(customer1), Encoding.UTF8, "application/json");
 
             var customer2 = new Customer
             {
                 Name = "Raul Gonzales",
                 Email = "gonzales@email.com"
             };
+            StringContent jsonStringContent2 = new StringContent(JsonConvert.SerializeObject(customer2), Encoding.UTF8, "application/json");
 
-            var postResponse1 = await client.PostAsJsonAsync("/api/customers", customer1);
+            var postResponse1 = await client.PostAsync("/api/customers", jsonStringContent1);
             Assert.Equal(HttpStatusCode.Created, postResponse1.StatusCode);
             var created1 = await postResponse1.Content.ReadAsAsync<Customer>();
 
-            var postResponse2 = await client.PostAsJsonAsync("/api/customers", customer2);
+            var postResponse2 = await client.PostAsync("/api/customers", jsonStringContent2);
             Assert.Equal(HttpStatusCode.Created, postResponse1.StatusCode);
             var created2 = await postResponse2.Content.ReadAsAsync<Customer>();
             Assert.Equal(created1.Id, created2.Id);
@@ -129,14 +131,9 @@ namespace CustomerChallengeTests
                 Name = "",
                 Email = "gonzales@email.com"
             };
+            StringContent jsonStringContent1 = new StringContent(JsonConvert.SerializeObject(customer1), Encoding.UTF8, "application/json");
 
-            var customer2 = new Customer
-            {
-                Name = "Raul Gonzales",
-                Email = ""
-            };
-
-            var postResponse1 = await client.PostAsJsonAsync("/api/customers", customer1);
+            var postResponse1 = await client.PostAsync("/api/customers", jsonStringContent1);
             Assert.Equal(HttpStatusCode.BadRequest, postResponse1.StatusCode);
 
         }
@@ -149,8 +146,9 @@ namespace CustomerChallengeTests
                 Name = "Raul Gonzales",
                 Email = ""
             };
+            StringContent jsonStringContent1 = new StringContent(JsonConvert.SerializeObject(customer1), Encoding.UTF8, "application/json");
 
-            var postResponse1 = await client.PostAsJsonAsync("/api/customers", customer1);
+            var postResponse1 = await client.PostAsync("/api/customers", jsonStringContent1);
             Assert.Equal(HttpStatusCode.BadRequest, postResponse1.StatusCode);
         }
 
@@ -162,8 +160,9 @@ namespace CustomerChallengeTests
                 Name = "Michael Gonzales",
                 Email = "wrongemailformat"
             };
+            StringContent jsonStringContent1 = new StringContent(JsonConvert.SerializeObject(customer1), Encoding.UTF8, "application/json");
 
-            var postResponse1 = await client.PostAsJsonAsync("/api/customers", customer1);
+            var postResponse1 = await client.PostAsync("/api/customers", jsonStringContent1);
             Assert.Equal(HttpStatusCode.BadRequest, postResponse1.StatusCode);
 
         }
